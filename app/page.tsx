@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 export default function Home() {
   const [status, setStatus] = useState('');
   const [alarm, setAlarm] = useState('');
+  const [password, setPassword] = useState('');
 
   const fetchStatus = async () => {
     try {
@@ -45,6 +46,49 @@ export default function Home() {
     }
   };
 
+  const handleButtonClick = async (value: any) => {
+    if (value === '#') {
+      // Jeśli kliknięto krzyżyk, wyczyść hasło
+      setPassword('');
+    } else if (value === '*') {
+      // Jeśli kliknięto gwiazdkę, wyczyść hasło
+      setPassword('');
+    } else {
+      // W przeciwnym razie dodaj klikniętą wartość do hasła
+      setPassword(prevPassword => prevPassword + value);
+    }
+
+    // Sprawdź, czy hasło zostało wprowadzone
+    console.log("sprawdzanoie hasła...") // "Checking password...
+    if (value === '#') {
+
+      // Zweryfikuj wprowadzone hasło
+      console.log('Weryfikacja hasłav2');
+      if (password == '1234') {
+        console.log('Poprawne hasło. Wysyłanie do API...');
+        alarm === '0' ? alert('Poprawne hasło. alarm zostanie uzbrojony za 10s') : alert('Poprawne hasło. zmianiam ustawiania alarmu...');
+        // Hasło poprawne - wybierz odpowiednie API w zależności od wartości alarmu
+        const apiEndpoint = alarm === '0' ? 'http://192.168.4.1/control?cmd=event,alarmOn' : 'http://192.168.4.1/control?cmd=event,alarmOff';
+        
+        try {
+          // Wyślij żądanie POST z hasłem do wybranego API
+          const response = await fetch(apiEndpoint, {
+            method: 'POST',
+            mode: 'no-cors'
+          });
+        } catch (error) {
+          console.error('Wystąpił błąd podczas wysyłania hasła:', error);
+        }
+      } else {
+        // Hasło niepoprawne
+        console.error('Niepoprawne hasło. Wprowadź poprawne hasło.');
+      }
+      
+      // Wyczyść hasło po wysłaniu lub w przypadku niepoprawnego hasła
+      setPassword('');
+    }
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
       fetchStatus();
@@ -54,11 +98,8 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
+
   // renderowanie
-
-
-
-
 
   let statusColorClass = ''; 
   let statusText = '';
@@ -107,19 +148,23 @@ export default function Home() {
           <div>
             <h2>Uzbrajanie/rozbrajanie alarmu</h2>
             <br />
+            <input
+              type="password"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              value={password}
+              readOnly
+            />
+            <br />
             <div className="grid grid-cols-3 gap-4">
-              <button className="bg-gray-400 p-4">1</button>
-              <button className="bg-gray-400 p-4">2</button>
-              <button className="bg-gray-400 p-4">3</button>
-              <button className="bg-gray-400 p-4">4</button>
-              <button className="bg-gray-400 p-4">5</button>
-              <button className="bg-gray-400 p-4">6</button>
-              <button className="bg-gray-400 p-4">7</button>
-              <button className="bg-gray-400 p-4">8</button>
-              <button className="bg-gray-400 p-4">9</button>
-              <button className="bg-gray-400 p-4">*</button>
-              <button className="bg-gray-400 p-4">0</button>
-              <button className="bg-gray-400 p-4">#</button>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, '*', 0, '#'].map((value) => (
+                <button
+                  key={value}
+                  className="bg-gray-400 p-4"
+                  onClick={() => handleButtonClick(value)}
+                >
+                  {value}
+                </button>
+              ))}
             </div>
           </div>
         </div>
